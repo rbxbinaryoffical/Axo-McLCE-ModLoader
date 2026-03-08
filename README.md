@@ -37,7 +37,7 @@ If You want to make mods you can read [our docs](https://axoloader.eu/docs) abou
 - Custom dimensions
 - Custom World Gen
 - Custom armors
-- And mamy more!
+- And many more!
 
 ## Authors
 
