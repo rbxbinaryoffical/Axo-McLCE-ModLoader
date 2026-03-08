@@ -22,7 +22,7 @@ Axo Minecraft Legacy Console Edition ModLoader is an ModLoader for leaked Minecr
 You can get our ModLoader **[here]()** or on our **[website](https://axoloader.eu)**!
 
 ## AxoAPI
-If You want to make mods you can read (our docs)[https://axoloader.eu/docs] about mod creating using AxoAPI!
+If You want to make mods you can read [our docs](https://axoloader.eu/docs) about mod creating using AxoAPI!
 
 **Curent AxoAPI features:**
 - Custom blocks
