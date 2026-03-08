@@ -33,6 +33,12 @@ If You want to make mods you can read [our docs](https://axoloader.eu/docs) abou
 - Custom entities
 - Custom blocks generation in world
 
+**AxoAPI features that are in plans:**
+- Custom dimensions
+- Custom World Gen
+- Custom armors
+- And mamy more!
+
 ## Authors
 
 - [@KaDerox](https://www.github.com/kaDerox)
