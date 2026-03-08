@@ -25,13 +25,13 @@ You can get our ModLoader **[here]()** or on our **[website](https://axoloader.e
 If You want to make mods you can read [our docs](https://axoloader.eu/docs) about mod creating using AxoAPI!
 
 **Curent AxoAPI features:**
-- Custom blocks
-- Custom items 
+- [] Custom blocks
+- [] Custom items 
 
 **WIP AxoAPI features:**
-- More blocks and item flags
-- Custom entities
-- Custom blocks generation in world
+- [] More blocks and item flags
+- [] Custom entities
+- [] Custom blocks generation in world
 
 **AxoAPI features that are in plans:**
 - Custom dimensions
