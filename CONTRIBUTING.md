@@ -15,12 +15,13 @@ As the project is mainly written in C++, any help with improving the code qualit
 
 ## Additional Technical Info
 1. Loader currently uses 6 custom files:
-  - AxoAPI.h
-  - AxoAPI.cpp
-  - AxoModLoader.h
-  - AxoModLoader.cpp
-  - AxoItemImpl.cpp
-  - AxoBlockImpl.cpp
+    - AxoAPI.h
+    - AxoAPI.cpp
+    - AxoModLoader.h
+    - AxoModLoader.cpp
+    - AxoItemImpl.cpp
+    - AxoBlockImpl.cpp
+2. You can get those files from decompiled game files or using our API!
     
 ## Reporting Issues
 
