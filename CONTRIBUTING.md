@@ -13,6 +13,15 @@ As the project is mainly written in C++, any help with improving the code qualit
 3. Make your improvements or fixes.
 4. Submit a pull request with a clear description of what you changed and why.
 
+## Additional Technical Info
+1. Loader currently uses 6 custom files:
+  - AxoAPI.h
+  - AxoAPI.cpp
+  - AxoModLoader.h
+  - AxoModLoader.cpp
+  - AxoItemImpl.cpp
+  - AxoBlockImpl.cpp
+    
 ## Reporting Issues
 
 If you find a bug or unexpected behavior, please open an issue or report it on discord and include:
