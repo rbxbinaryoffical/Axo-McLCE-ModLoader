@@ -116,8 +116,8 @@ else
 Done! Pretty simple aswell!
 
 ## FAQ
-Q: Was AI used to create Axo?
-A: Yes, it was used for bug fixes and code optimization. If you're not happy about it, just don't use Axo Loader.
+- Q: Was AI used to create Axo?
+- A: Yes, it was used for bug fixes and code optimization. If you're not happy about it, just don't use Axo Loader.
 
 ## More about
 I started working on it a bit later than everyone else so I'm a little behind but I believe I can catch up to other mod loaders and give players good experience!
