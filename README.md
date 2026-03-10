@@ -25,8 +25,7 @@ After that get our ModLoader **[here]()** or on our **[website](https://axoloade
 If you want to make mods for AxoLoader you can read [our docs](https://axoloader.eu/docs) about mod creating using AxoAPI!
 
 **Current AxoAPI features:**
-- [x] Custom blocks
-- [x] Custom blocks drops
+- [x] Custom blocks with custom drop
 - [x] Custom items 
 
 **WIP AxoAPI features:**
