@@ -43,18 +43,18 @@ If you want to create mods for AxoLoader you can read under this section about m
 - [ ] And many more!
 
 ## Making Mods
-Here I will provide you with samples of using AxoAPI!
+Here I will provide examples of using AxoAPI.
 
 ### Mod setup
-Every mod for Axo needs 3 files:
+Every Axo mod needs 3 files:
     - mod.dll
     - manifest.json (currently used as a base for later development)
     - textures
         - items (only if you add items)
         - terrain (only if you add blocks)
 ### Creating mod.dll
-1. Create blank DLL project. Open created project and delete genereted .cpp files. Download AxoAPI.h from [here](a) and put it into source files.
-2. Create YourModName.cpp in source files. This is main code for your mod:
+1. Create blank DLL project. Open the created project and delete generated .cpp files Download AxoAPI.h from [here](a) and place it in the source files
+2. Create YourModName.cpp in the source files. This is the main code for your mod:
    ```
     #define AXO_MOD 
     #define MOD_ID "test_mod"
@@ -62,20 +62,62 @@ Every mod for Axo needs 3 files:
 
     extern "C" __declspec(dllexport)
     void ModEntry(AxoMod* /*mod*/, AxoAPITable* api) {
-        AxoMod_SetAPI(api); 
-
+        AxoMod_SetAPI(api);
+       // Here you register things like blocks, items, etc.
     }
-
+   
     extern "C" __declspec(dllexport)
     void OnTick() {
+       // Currently not used for anything.
     }
-
+   
     extern "C" __declspec(dllexport)
     void OnShutdown() {
-    
+       // Method called on shutdown
     }
     ```
+   
+### Adding new blocks
+Registering new blocks in Axo is simple! All registrations go in the ```void ModEntry``` function.
+Here is an example of adding a block:
+```
+AxoBlockDef exampleBlock;
+exampleBlock.id = 174; // Will be replaced in comming days to auto giving id
+exampleBlock.dropItemId = 0;
+exampleBlock.dropCount = 1;
+exampleBlock.iconName = L"example_block";
+exampleBlock.name = "Example Block";
+exampleBlock.hardness = 3.0f;
+exampleBlock.resistance = 5.0f;
+exampleBlock.creativeTab = AxoTab_BuildingBlocks; // You can find AxoTab references in AxoAPI.h
 
+if AxoAPI_RegisterBlock(&exampleBlock)
+    AxoAPI_Log("Example Block DONE.");
+else
+    AxoAPI_Log("Example Block ERROR.");
+```
+And that's all you need to register a block! Pretty simple!
+
+### Adding new items
+Registering new items in Axo is also very simple All registrations also go in the ```void ModEntry``` function.
+Here is an example of adding an item:
+```
+AxoItemDef exampleItem;
+exampleItem.id = 500; // This will also be removed in a few days
+exampleItem.iconName = L"example_item";
+exampleItem.name = "Example Item";
+exampleItem.maxStackSize = 16;
+
+if (AxoAPI_RegisterItem(&exampleItem))
+    AxoAPI_Log("Example Item DONE.");
+else
+    AxoAPI_Log("Example Item ERROR.");
+```
+Done! Pretty simple aswell!
+
+## FAQ
+Q: Was AI used to create Axo?
+A: Yes, it was used for bug fixes and code optimization. 
 
 ## More about
 I started working on it a bit later than everyone else so I'm a little behind but I believe I can catch up to other mod loaders and give players good experience!
