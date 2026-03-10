@@ -19,13 +19,13 @@ Axo Minecraft Legacy Console Edition ModLoader is a ModLoader for the leaked Min
 - You don't need to download a new installer every time there is an update. The installer uses our API to download newest ModLoader builds!
 
 ## Installation
-You can get our ModLoader **[here]()** or on our **[website](https://axoloader.eu)**! Then launch downloaded exe file and complete setup!
-
+You will need Visual Studio 2022 for autocompiler. Then clone repository of one of supported version of McLCE and in Visual Studio set Minecraft.Client as a startup project. 
+After that get our ModLoader **[here]()** or on our **[website](https://axoloader.eu)**! Then launch downloaded exe file and complete setup and your done!
 ## AxoAPI
 If you want to make mods for AxoLoader you can read [our docs](https://axoloader.eu/docs) about mod creating using AxoAPI!
 
 **Current AxoAPI features:**
-- [ ] Custom blocks
+- [x] Custom blocks
 - [x] Custom items 
 
 **WIP AxoAPI features:**
