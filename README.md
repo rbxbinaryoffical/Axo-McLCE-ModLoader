@@ -2,7 +2,7 @@
 # Axo McLCE ModLoader
 [![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/Rm5fscpnT4)
 
-Axo Minecraft Legacy Console Edition ModLoader is a ModLoader for the leaked Minecraft Console Edition that adds mod compatibility!
+Axo Minecraft Legacy Console Edition ModLoader is a ModLoader for the McLCE that adds mod compatibility!
 
 
 ![Logo](http://axoloader.eu/api/assets/Logo_Baner.png) 
