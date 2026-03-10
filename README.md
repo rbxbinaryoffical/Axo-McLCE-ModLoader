@@ -21,6 +21,7 @@ Axo Minecraft Legacy Console Edition ModLoader is a ModLoader for the leaked Min
 ## Installation
 You will need Visual Studio 2022 for autocompiler. Then clone repository of one of supported version of McLCE and in Visual Studio set Minecraft.Client as a startup project. 
 After that get our ModLoader **[here](https://github.com/KaDerox/Axo-McLCE-ModLoader/releases)**! Then launch downloaded exe file and complete setup and you're done!
+
 NOTE: Compilation part of installer opens cmd
 
 ## AxoAPI
