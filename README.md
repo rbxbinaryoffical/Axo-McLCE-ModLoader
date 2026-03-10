@@ -16,13 +16,14 @@ Axo Minecraft Legacy Console Edition ModLoader is a ModLoader for the leaked Min
 - Make mods using .dll files
 - Built-in autocompiler in the installer
 - AxoAPI in full development (Will allow for easier mod making using predefined API)
-- You don't need to download a new installer every time there is an update. You will need to download new installer only when there are major changes. The installer uses our API to download newest ModLoader builds!
+- You don't need to download a new installer every time there is an update. You will need to download new installer only when there are major changes. The installer uses our API to download the newest ModLoader builds!
 
 ## Installation
 You will need Visual Studio 2022 for autocompiler. Then clone repository of one of supported version of McLCE and in Visual Studio set Minecraft.Client as a startup project. 
-After that get our ModLoader **[here]()** or on our **[website](https://axoloader.eu)**! Then launch downloaded exe file and complete setup and your done!
+After that get our ModLoader **[here]()** or on our **[website](https://axoloader.eu)**! Then launch downloaded exe file and complete setup and you're done!
+
 ## AxoAPI
-If you want to make mods for AxoLoader you can read [our docs](https://axoloader.eu/docs) about mod creating using AxoAPI!
+If you want to create mods for AxoLoader you can read [our docs](https://axoloader.eu/docs) about mod creating using AxoAPI!
 
 **Current AxoAPI features:**
 - [x] Custom blocks with custom drop
@@ -33,12 +34,12 @@ If you want to make mods for AxoLoader you can read [our docs](https://axoloader
 - [ ] Custom recipes
 - [ ] Custom entities
 - [ ] Custom block generation in the world
-- [ ] Custom blocks models
+- [ ] Custom block models
 
 **AxoAPI features that are in plans:**
 - [ ] Custom dimensions
 - [ ] Custom World Gen
-- [ ] Custom armors
+- [ ] Custom armor
 - [ ] And many more!
 
 ## More about
