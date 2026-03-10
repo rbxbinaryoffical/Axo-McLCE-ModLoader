@@ -101,7 +101,7 @@ else
 And that's all you need to register a block! Pretty simple!
 
 ### Adding new items
-Registering new items in Axo is also very simple All registrations also go in the ```void ModEntry``` function.
+Registering new items in Axo is also very simple! All registrations also go in the ```void ModEntry``` function.
 Here is an example of adding an item:
 ```
 AxoItemDef exampleItem;
