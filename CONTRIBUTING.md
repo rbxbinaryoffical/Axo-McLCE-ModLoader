@@ -4,11 +4,11 @@ Thank you for your interest in contributing to Axo Loader.
 
 Contributions are very welcome. If you have ideas for improvements, bug fixes, or new features, feel free to open a pull request or submit an issue to discuss your proposal.
 
-As the project is mainly written in C++, any help with improving the code quality, performance, or structure is especially appreciated.
+As the project is written in C++, any help with improving the code quality, performance, or structure is especially appreciated.
 
 ## How to Contribute
 
-1. Get the modloader cpp and h files.
+1. Get the modloader .cpp and .h files.
 2. Make your improvements or fixes.
 3. Submit a pull request with a clear description of what you changed and why.
 
