@@ -20,7 +20,7 @@ Axo Minecraft Legacy Console Edition ModLoader is a ModLoader for the leaked Min
 
 ## Installation
 You will need Visual Studio 2022 for autocompiler. Then clone repository of one of supported version of McLCE and in Visual Studio set Minecraft.Client as a startup project. 
-After that get our ModLoader **[here]()**! Then launch downloaded exe file and complete setup and you're done!
+After that get our ModLoader **[here](https://github.com/KaDerox/Axo-McLCE-ModLoader/releases)**! Then launch downloaded exe file and complete setup and you're done!
 
 ## AxoAPI
 If you want to create mods for AxoLoader you can read under this section about mod creating using AxoAPI!
@@ -53,7 +53,7 @@ Every Axo mod needs 3 files:
         - items (only if you add items)
         - terrain (only if you add blocks)
 ### Creating mod.dll
-1. Create blank DLL project. Open the created project and delete generated .cpp files Download AxoAPI.h from [here](a) and place it in the source files
+1. Create blank DLL project. Open the created project and delete generated .cpp files Download AxoAPI.h from **[here](https://github.com/KaDerox/Axo-McLCE-ModLoader/releases)** and place it in the source files
 2. Create YourModName.cpp in the source files. This is the main code for your mod:
    ```
     #define AXO_MOD 
@@ -117,10 +117,10 @@ Done! Pretty simple aswell!
 
 ## FAQ
 - Q: Was AI used to create Axo?
-- A: Yes, it was used for bug fixes and code optimization. If you're not happy about it, just don't use Axo Loader.
+- A: Yes, it was used for bug fixes and code optimization and to speed up its development of it. If you're not happy about it, just don't use Axo Loader.
 
 ## More about
-I started working on it a bit later than everyone else so I'm a little behind but I believe I can catch up to other mod loaders and give players good experience!
+I started working on it a bit later than everyone else so I'm a little behind but I believe I can catch up to other mod loaders and give players good experience! Also I know that this code could be better but I'm not the greatest at c++ and that's why there is **[CONTRIBUTING.md](https://github.com/KaDerox/Axo-McLCE-ModLoader?tab=contributing-ov-file)**!
 
 ## Authors
 
