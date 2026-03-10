@@ -53,7 +53,7 @@ Every Axo mod needs 3 files:
 - manifest.json (currently used as a base for later development)
 - textures:
   - items (only if you add items)
-    - terrain (only if you add blocks)
+  - terrain (only if you add blocks)
 
 ### Creating mod.dll
 1. Create blank DLL project. Open the created project and delete generated .cpp files Download AxoAPI.h from **[here](https://github.com/KaDerox/Axo-McLCE-ModLoader/releases)** and place it in the source files
