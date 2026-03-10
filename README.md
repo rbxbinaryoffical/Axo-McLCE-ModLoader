@@ -82,10 +82,10 @@ Registering new blocks in Axo is simple! All registrations go in the ```void Mod
 Here is an example of adding a block:
 ```
 AxoBlockDef exampleBlock;
-exampleBlock.id = 174; // Will be replaced in comming days to auto giving id
-exampleBlock.dropItemId = 0;
+exampleBlock.id = 174; // Will be replaced in comming days to auto giving id, free id: 174–255
+exampleBlock.dropItemId = 0; // 0 = drop itself other are item drops
 exampleBlock.dropCount = 1;
-exampleBlock.iconName = L"example_block";
+exampleBlock.iconName = L"example_block"; // From textures/terrain
 exampleBlock.name = "Example Block";
 exampleBlock.hardness = 3.0f;
 exampleBlock.resistance = 5.0f;
@@ -103,10 +103,10 @@ Registering new items in Axo is also very simple All registrations also go in th
 Here is an example of adding an item:
 ```
 AxoItemDef exampleItem;
-exampleItem.id = 500; // This will also be removed in a few days
-exampleItem.iconName = L"example_item";
+exampleItem.id = 500; // This will also be removed in a few days, free id: 422–4095
+exampleItem.iconName = L"example_item"; // From textures/items
 exampleItem.name = "Example Item";
-exampleItem.maxStackSize = 16;
+exampleItem.maxStackSize = 16; // Stack Size
 
 if (AxoAPI_RegisterItem(&exampleItem))
     AxoAPI_Log("Example Item DONE.");
@@ -117,7 +117,7 @@ Done! Pretty simple aswell!
 
 ## FAQ
 Q: Was AI used to create Axo?
-A: Yes, it was used for bug fixes and code optimization. 
+A: Yes, it was used for bug fixes and code optimization. If you're not happy about it, just don't use Axo Loader.
 
 ## More about
 I started working on it a bit later than everyone else so I'm a little behind but I believe I can catch up to other mod loaders and give players good experience!
