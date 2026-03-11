@@ -24,6 +24,9 @@ After that get our ModLoader **[here](https://github.com/KaDerox/Axo-McLCE-ModLo
 
 NOTE: Compilation part of installer opens cmd
 
+**WARNING**
+Axo currently works only on Windows. Linux and macOS are not supported yet, but support will be added in the future.
+
 ## AxoAPI
 If you want to create mods for AxoLoader you can read under this section about mod creating using AxoAPI!
 
