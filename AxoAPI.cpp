@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #include "AxoAPI.h"
 #include "AxoModLoader.h"
 
@@ -182,4 +184,5 @@ void AxoAPI_FlushCreativeMenu() {
         AxoItem_AddToCreativeMenu(r.id, r.creativeTab);
     for (const auto& r : sRegisteredBlocks)
         AxoBlock_AddToCreativeMenu(r.id, r.creativeTab);
+
 }
