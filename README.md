@@ -157,7 +157,7 @@ And done!
 AxoItemDef examplePickaxe;
 examplePickaxe.iconName = L"example_pickaxe";
 examplePickaxe.name = "Example Pickaxe";
-examplePickaxe.isPickaxe = true; // Available options are isPickaxe, isAxe, isShovel
+examplePickaxe.isPickaxe = true; // Available options are "isPickaxe, isAxe, isShovel"
 examplePickaxe.miningSpeed = 9.0f; // Mining speed, base: 1.0f
 
 if (AxoAPI_RegisterItem(&exampleSword))
