@@ -41,6 +41,7 @@ If you want to create mods for AxoLoader you can read under this section about m
 - [ ] Custom entities
 - [ ] Custom block generation in the world
 - [ ] Custom block models
+- [ ] Custom item models
 
 **AxoAPI features that are in plans:**
 - [ ] Custom dimensions
