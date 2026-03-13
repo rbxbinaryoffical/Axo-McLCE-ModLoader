@@ -243,9 +243,9 @@ AxoAPI_RegisterRecipe(&exampleShaped);
 Creating recipes here is a bit harder than with others. Here is a table showing the slot number corresponding to the crafting location:
 
 | 0 | 1 | 2 |
-| --------- |
+| - | - | - |
 | 3 | 4 | 5 |
-| --------- |
+| - | - | - |
 | 6 | 7 | 8 |
 
 Now you know how to add custom recipes using Axo!
