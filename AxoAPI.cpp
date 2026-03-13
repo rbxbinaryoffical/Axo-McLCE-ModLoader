@@ -12,11 +12,13 @@ extern bool AxoItem_CreateFromDef(const AxoItemDef& def);
 extern void AxoItem_AddToCreativeMenu(int itemId, int creativeTab);
 extern bool AxoBlock_CreateFromDef(const AxoBlockDefInternal& def);
 extern void AxoBlock_AddToCreativeMenu(int blockId, int creativeTab);
+extern bool AxoRecipe_CreateFromDef(const AxoRecipeDef& def);
 
 AxoAPITable* gAxoAPI = nullptr;
 
-static std::vector<AxoItemDef>  sPendingItems;
-static std::vector<AxoBlockDef> sPendingBlocks;
+static std::vector<AxoItemDef>   sPendingItems;
+static std::vector<AxoBlockDef>  sPendingBlocks;
+static std::vector<AxoRecipeDef> sPendingRecipes;
 
 static int sNextItemId  = 422;
 static int sNextBlockId = 174;
@@ -139,10 +141,19 @@ static bool Impl_RegisterBlock(const AxoBlockDef* def) {
     return true;
 }
 
+static bool Impl_RegisterRecipe(const AxoRecipeDef* def) {
+    if (!def) return false;
+    sPendingRecipes.push_back(*def);
+    printf("[AxoLoader] Queued recipe -> \"%s\" (x%d)\n",
+           def->resultItemName.c_str(), def->resultCount);
+    return true;
+}
+
 static AxoAPITable sAPITable = {
     Impl_Log,
     Impl_RegisterItem,
-    Impl_RegisterBlock
+    Impl_RegisterBlock,
+    Impl_RegisterRecipe
 };
 
 AxoAPITable* AxoAPI_GetTable() {
@@ -184,5 +195,21 @@ void AxoAPI_FlushCreativeMenu() {
         AxoItem_AddToCreativeMenu(r.id, r.creativeTab);
     for (const auto& r : sRegisteredBlocks)
         AxoBlock_AddToCreativeMenu(r.id, r.creativeTab);
+}
 
+void AxoAPI_FlushRecipeRegistrations() {
+    printf("[AxoLoader] FlushRecipeRegistrations: %u recipe(s)...\n", (unsigned)sPendingRecipes.size());
+    for (const auto& def : sPendingRecipes)
+        AxoRecipe_CreateFromDef(def);
+    sPendingRecipes.clear();
+}
+
+int AxoAPI_ResolveItemName(const std::string& name) {
+    const auto& map = GetVanillaItemMap();
+    auto it = map.find(name);
+    if (it != map.end()) return it->second;
+    for (const auto& r : sRegisteredItems) {
+        if (r.name == name) return r.id;
+    }
+    return -1;
 }
