@@ -35,9 +35,9 @@ If you want to create mods for AxoLoader you can read under this section about m
 - [x] Custom items
 - [x] Food items
 - [x] Custom swords, pickaxes, axes and shovels
+- [x] Custom recipes (may be bit bugged)
 
 **WIP AxoAPI features:**
-- [ ] Custom recipes
 - [ ] Custom entities
 - [ ] Custom block generation in the world
 - [ ] Custom block models
@@ -159,6 +159,7 @@ AxoItemDef exampleSword;
 exampleSword.iconName = L"example_sword";
 exampleSword.name = "Example Sword";
 exampleSword.attackDamage = 99; // Attack damage base: 1
+exampleSwoed.isHandheld = true; // Declares if it's an handheld or not
 
 if (AxoAPI_RegisterItem(&exampleSword))
     AxoAPI_Log("Example Sword DONE.");
@@ -187,6 +188,67 @@ To log in Axo all you need to use is:
 AxoAPI_Log("Example Log");
 ```
 And done! Now it logs in debug console!
+
+## Adding recipes
+Here are examples of creating custom recipes
+
+### Furnace recipe
+```
+AxoRecipeDef exampleFurnace;
+exampleFurnace.isFurnace       = true;
+exampleFurnace.furnaceInputName = "Example Item"; // Input item name
+exampleFurnace.resultItemName   = "diamond"; // Output item name
+exampleFurnace.resultCount      = 1;
+exampleFurnace.furnaceXP        = 0.7f;
+
+AxoAPI_RegisterRecipe(&exampleFurnace);
+```
+
+### Shapeless crafting recipes
+```
+AxoRecipeDef exampleShapeless;
+exampleShapeless.isShaped  = false;
+exampleShapeless.isFurnace = false;
+exampleShapeless.resultItemName = "Example Item";
+exampleShapeless.resultCount    = 1;
+exampleShapeless.ingredients[0] = "diamond";
+exampleShapeless.ingredients[1] = "emerald";
+exampleShapeless.ingredients[2] = "ender_pearl";
+exampleShapeless.ingredientCount = 3;
+exampleShapeless.recipeGroup = AxoTab_Armor; // Declares which crafting tab is in
+
+AxoAPI_RegisterRecipe(&exampleShapeless);
+```
+
+### Shaped crafting recipes
+```
+AxoRecipeDef exampleShaped;
+exampleShaped.isShaped      = true;
+exampleShaped.isFurnace     = false;
+exampleShaped.resultItemName = "Example Item";
+exampleShaped.resultCount    = 1;
+exampleShaped.grid[0] = { "emerald" };
+exampleShaped.grid[1] = { "diamond" };
+exampleShaped.grid[2] = { "diamond" };
+exampleShaped.grid[3] = { "" };
+exampleShaped.grid[4] = { "stick" };
+exampleShaped.grid[5] = { "" };
+exampleShaped.grid[6] = { "" };
+exampleShaped.grid[7] = { "stick" };
+exampleShaped.grid[8] = { "" };
+exampleShaped.recipeGroup = AxoTab_Armor;
+
+AxoAPI_RegisterRecipe(&exampleShaped);
+```
+Creating recipes here is a bit harder than with others. Here is a table showing the slot number corresponding to the crafting location:
+
+| 0 | 1 | 2 |
+| --------- |
+| 3 | 4 | 5 |
+| --------- |
+| 6 | 7 | 8 |
+
+Now you know how to add custom recipes using Axo!
 
 ### Adding textures
 In the folder with manifest.json and mod.dll, you should have a textures folder with two subfolders: terrain and items. In the terrain folder you put block textures, and in the items folder you put item textures.
