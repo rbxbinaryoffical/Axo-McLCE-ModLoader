@@ -46,6 +46,7 @@ struct AxoItemDef {
     bool             isPickaxe    = false;
     bool             isAxe        = false;
     bool             isShovel     = false;
+    bool             isHandheld   = false;
 
     bool             isEdible     = false;
     AxoFoodDef       food;
@@ -83,6 +84,34 @@ struct AxoBlockDefInternal {
     int          dropCount;
 };
 
+struct AxoCraftingSlot {
+    std::string itemName = "";
+    int         count    = 1;
+};
+
+enum AxoRecipeGroup {
+    AxoRecipe_Food        = 0,
+    AxoRecipe_Tools       = 1,
+    AxoRecipe_Armor       = 2,
+    AxoRecipe_Mechanisms  = 3,
+    AxoRecipe_Transport   = 4,
+    AxoRecipe_Structures  = 5,
+    AxoRecipe_Decoration  = 6,
+};
+
+struct AxoRecipeDef {
+    std::string resultItemName;
+    int         resultCount     = 1;
+    bool isShaped    = true;
+    bool isFurnace   = false;
+    int  recipeGroup = AxoRecipe_Decoration;
+    AxoCraftingSlot grid[9];
+    std::string ingredients[9];
+    int         ingredientCount = 0;
+    std::string furnaceInputName;
+    float       furnaceXP = 0.1f;
+};
+
 struct AxoMod {
     const char* id;
 };
@@ -91,6 +120,7 @@ struct AxoAPITable {
     void (*Log)(const char* modId, const char* msg);
     bool (*RegisterItem)(const AxoItemDef* def);
     bool (*RegisterBlock)(const AxoBlockDef* def);
+    bool (*RegisterRecipe)(const AxoRecipeDef* def);
 };
 
 #ifndef MOD_ID
@@ -107,3 +137,4 @@ extern AxoAPITable* gAxoAPI;
 #define AxoAPI_Log(msg)            (gAxoAPI->Log(MOD_ID, msg))
 #define AxoAPI_RegisterItem(def)   (gAxoAPI->RegisterItem(def))
 #define AxoAPI_RegisterBlock(def)  (gAxoAPI->RegisterBlock(def))
+#define AxoAPI_RegisterRecipe(def)  (gAxoAPI->RegisterRecipe(def))
