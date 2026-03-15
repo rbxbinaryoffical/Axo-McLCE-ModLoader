@@ -251,6 +251,31 @@ Creating recipes here is a bit harder than with others. Here is a table showing 
 
 Now you know how to add custom recipes using Axo!
 
+### Custom block generation in the overworld
+Here are the basics of making block spawn in overworld! It's normal block registration but with spawn flags!
+```
+AxoBlockDef exampleOre;
+exampleOre.dropItemName = "Ruby";
+exampleOre.dropCount = 3;
+exampleOre.iconName = L"ruby_ore";
+exampleOre.name = "Ruby Ore";
+exampleOre.hardness = 0.5f;
+exampleOre.resistance = 10.0f;
+exampleOre.creativeTab = AxoTab_BuildingBlocks;
+exampleOre.spawn.enabled = true; // Does it spawn?
+exampleOre.spawn.likeOre = true; // Does it spawns like ore?
+exampleOre.spawn.frequency = 20; // How frequent it spawns
+exampleOre.spawn.veinSize = 4; // Max Vein size 
+exampleOre.spawn.yLevelMin = 0; // Min. y Level of spawning
+exampleOre.spawn.yLevelMax = 32; // Max. y Level of spawning 
+exampleOre.spawn.inOverworld = true; // Does it spawns in overworld?
+if AxoAPI_RegisterBlock(&block2)
+        AxoAPI_Log("Example Ore DONE.");
+else
+        AxoAPI_Log("Example Ore ERROR.");
+```
+And you're done!
+
 ### Custom ore generation in the nether
 It's simple!
 ```
