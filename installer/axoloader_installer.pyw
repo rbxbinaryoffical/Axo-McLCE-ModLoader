@@ -202,7 +202,7 @@ def install_smartcmd_modloader():
     selected_directory = directory_entry.get()
     create_shortcut = doShortcut.get() == 1
 
-    # Function to create a shortcut file form C:\Users\{username}\source\repos\Axo_McLCE_ModLoader\x64\Debug\Minecraft.Client.exe on the desktop
+    # Function to create a shortcut 
     def create_shortcut_file():
         selected_build = loader_combo.get()
         file_exe = os.path.join(destination, "x64", selected_build, "Minecraft.Client.exe")
@@ -265,7 +265,7 @@ def install_smartcmd_modloader():
             target_dir = os.path.join(destination, "Minecraft.Client", "Windows64")
         os.makedirs(target_dir, exist_ok=True)
 
-        files = ["AxoModLoader.h", "AxoModLoader.cpp", "AxoAPI.h", "AxoAPI.cpp", "AxoItemImpl.cpp", "AxoBlockImpl.cpp", "AxoRecipeImpl.cpp"]
+        files = ["AxoModLoader.h", "AxoModLoader.cpp", "AxoAPI.h", "AxoAPI.cpp", "AxoItemImpl.cpp", "AxoBlockImpl.cpp", "AxoRecipeImpl.cpp", "AxoWorldGen.cpp", "AxoWorldGen.h"]
         for file in files:
             try:
                 response = requests.get(f"http://axoloader.eu/api/assets/modloader/{build_version}/{file}", timeout=10)
@@ -393,6 +393,11 @@ def install_smartcmd_modloader():
         mcpp = os.path.join(base, "Minecraft.Client", "Minecraft.cpp")
         uiscene_mm_cpp = os.path.join(base, "Minecraft.Client", "Common", "UI", "UIScene_MainMenu.cpp")
         recipes = os.path.join(base, "Minecraft.World", "Recipes.h")
+        biome_decorator = os.path.join(base, "Minecraft.World", "BiomeDecorator.cpp")
+        hell_random = os.path.join(base, "Minecraft.World", "HellRandomLevelSource.cpp")
+        hell_flat = os.path.join(base, "Minecraft.World", "HellFlatLevelSource.cpp")
+        survival_mode = os.path.join(base, "Minecraft.Client", "SurvivalMode.cpp")
+        tile_h = os.path.join(base, "Minecraft.World", "Tile.h")
         steps = [
             (40, "Copying files... (This may take a bit)", lambda: perform_installation()),
             (50, "Downloading modloader...", lambda: download_modloader()),
@@ -414,16 +419,24 @@ def install_smartcmd_modloader():
                 inject_modloader(mcpp, '#include "DLCTexturePack.h"', '#include "Windows64/AxoModLoader.h"'),
                 inject_modloader(pstmcpp, 'float vertRatio = 1.0f/32.0f;', '\n\t\tfor (auto& e : s_axoTerrainPendingIcons) {' '\n\t\t\tADD_ICON(e.row, e.col, e.name)' '\n\t\t}'),
                 inject_modloader(pstmcpp, 'std::vector<PreStitchedTextureMap::AxoIconSlot> PreStitchedTextureMap::s_axoPendingIcons;', 'std::vector<PreStitchedTextureMap::AxoTerrainIconSlot> PreStitchedTextureMap::s_axoTerrainPendingIcons;'),
-                inject_modloader(uiscene_mm_cpp, 'PIXEndNamedEvent();', '\n\n\t\tMinecraft *pMinecraft = Minecraft::GetInstance();\n\t\tFont *font = pMinecraft->font;\n\t\tCustomDrawData *cdd = ui.setupCustomDraw(this, region);\n\t\tdelete cdd;\n\t\tglDisable(GL_CULL_FACE);\n\t\tglDisable(GL_DEPTH_TEST);\n\t\tglPushMatrix();\n\t\tfloat scale = m_fScreenWidth / m_fRawWidth;\n\t\tfloat x = (-m_fRawWidth  / 2.2f) + 2.0f;\n\t\tfloat y = ( m_fRawHeight / 9.0f) - 10.0f;\n\t\tglTranslatef(x * scale, y * scale, 0);\n\t\tglScalef(scale, scale, scale);\n\t\tfont->drawShadow(L"AxoLoader v1.0.3", 0, 0, 0xAAAAAA);\n\t\tglPopMatrix();\n\t\tglEnable(GL_DEPTH_TEST);\n\t\tui.endCustomDraw(region);'),
+                inject_modloader(uiscene_mm_cpp, 'PIXEndNamedEvent();', '\n\n\t\tMinecraft *pMinecraft = Minecraft::GetInstance();\n\t\tFont *font = pMinecraft->font;\n\t\tCustomDrawData *cdd = ui.setupCustomDraw(this, region);\n\t\tdelete cdd;\n\t\tglDisable(GL_CULL_FACE);\n\t\tglDisable(GL_DEPTH_TEST);\n\t\tglPushMatrix();\n\t\tfloat scale = m_fScreenWidth / m_fRawWidth;\n\t\tfloat x = (-m_fRawWidth  / 2.2f) + 2.0f;\n\t\tfloat y = ( m_fRawHeight / 9.0f) - 10.0f;\n\t\tglTranslatef(x * scale, y * scale, 0);\n\t\tglScalef(scale, scale, scale);\n\t\tfont->drawShadow(L"AxoLoader v1.0.5", 0, 0, 0xAAAAAA);\n\t\tglPopMatrix();\n\t\tglEnable(GL_DEPTH_TEST);\n\t\tui.endCustomDraw(region);'),
                 inject_modloader_replace(recipes, "private:\n\tvoid buildRecipeIngredientsArray();", "public:\n\tvoid buildRecipeIngredientsArray();"),
+                inject_modloader(biome_decorator, '#include "stdafx.h"', '#include "..\\Minecraft.Client\\Windows64\\AxoWorldGen.h"'),
+                inject_modloader(biome_decorator, 'level->setInstaTick(false);', '\tAxoWorldGen_Decorate(level, random, biome, xo, zo);'),
+                inject_modloader(hell_random, '#include "stdafx.h"', '#include "..\\Minecraft.Client\\Windows64\\AxoWorldGen.h"'),
+                inject_modloader(hell_random, 'app.processSchematics(parent->getChunk(xt,zt));', '\tAxoWorldGen_Decorate(level, pprandom, level->getBiome(xo + 8, zo + 8), xo, zo);'),
+                inject_modloader(hell_flat, '#include "stdafx.h"', '#include "..\\Minecraft.Client\\Windows64\\AxoWorldGen.h"'),
+                inject_modloader(hell_flat, 'app.processSchematics(parent->getChunk(xt,zt));', '\tAxoWorldGen_Decorate(level, pprandom, level->getBiome(xo + 8, zo + 8), xo, zo);'),
+                inject_modloader_replace(survival_mode, 'if (changed && couldDestroy) \n\t{\n\t\tTile::tiles[t]->playerDestroy(minecraft->level, minecraft->player, x, y, z, data);\n\t}', 'if (changed && (couldDestroy || Tile::tiles[t]->isAxoCanBeBrokenByHand())) \n\t{\n\t\tTile::tiles[t]->playerDestroy(minecraft->level, minecraft->player, x, y, z, data);\n\t}'),
+                inject_modloader(tile_h, 'int getFaceFlags(LevelSource *level, int x, int y, int z);', '\tvirtual bool isAxoCanBeBrokenByHand() { return false; }'),
             ]),
             (65, "Setting up dependencies...", lambda:[
                 inject_vsxproj(vcxproj,
                     '<ClCompile Include="Windows64\\Windows64_Minecraft.cpp"',
-                    '    <ClCompile Include="Windows64\\AxoAPI.cpp" />\n    <ClCompile Include="Windows64\\AxoModLoader.cpp" />\n    <ClCompile Include="Windows64\\AxoItemImpl.cpp" />\n    <ClCompile Include="Windows64\\AxoBlockImpl.cpp" />\n    <ClCompile Include="Windows64\\AxoRecipeImpl.cpp" />'),
+                    '    <ClCompile Include="Windows64\\AxoAPI.cpp" />\n    <ClCompile Include="Windows64\\AxoModLoader.cpp" />\n    <ClCompile Include="Windows64\\AxoItemImpl.cpp" />\n    <ClCompile Include="Windows64\\AxoBlockImpl.cpp" />\n    <ClCompile Include="Windows64\\AxoRecipeImpl.cpp" />\n    <ClCompile Include="Windows64\\AxoWorldGen.cpp" />'),
                 inject_vsxproj(vcxproj,
                     '<ClInclude Include="Windows64\\KeyboardMouseInput.h"',
-                    '    <ClInclude Include="Windows64\\AxoAPI.h" />\n    <ClInclude Include="Windows64\\AxoModLoader.h" />'),
+                    '    <ClInclude Include="Windows64\\AxoAPI.h" />\n    <ClInclude Include="Windows64\\AxoModLoader.h" />\n    <ClInclude Include="Windows64\\AxoWorldGen.h" />'),
             ]),
             (70, "Setting up project...", lambda: create_mods()),
             (80, "Compiling... (This may take a bit)",  lambda: compile_project()),
