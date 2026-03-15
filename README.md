@@ -277,6 +277,37 @@ else
 ```
 Done!
 
+### Custom plants in axo
+It's the same process that is used in creation of blocks but you add few flags!
+```
+AxoBlockDef exampleFlower;
+exampleFlower.name            = "Glow Flower";
+exampleFlower.iconName        = L"flower_vines";
+exampleFlower.dropItemName = "";
+exampleFlower.hardness        = 0.2f;
+exampleFlower.resistance      = 0.5f;
+exampleFlower.creativeTab     = AxoTab_Decoration;
+exampleFlower.spawn.enabled   = true; // Does it have spawning enabled 
+exampleFlower.spawn.likeOre   = false; // Set so it doesn't spawn like ore
+exampleFlower.spawn.likeGrass = true; // Does it spawn like grass
+exampleFlower.spawn.onTerrain = true; // Does it spawn on terrain?
+exampleFlower.spawn.onWater = false; // Can it spawn on water?
+exampleFlower.spawn.frequency = 30; // Spawning frequency 
+exampleFlower.spawn.yLevelMin = 60; Min. y Level of spawning 
+exampleFlower.spawn.yLevelMax = 128; // Max. y Level of spawning 
+exampleFlower.spawn.inOverworld = true; // Does it spawn in overworld 
+exampleFlower.spawn.inBiome = "Plains"; // In which biome it can generate (leave "" for every)
+exampleFlower.noCollision       = true; // Does it have collisions?
+exampleFlower.canBePlacedOnlyOn = "grass"; // Where can it be placed on?
+exampleFlower.renderShape = AxoShape_Cross; // Does it uses cross texture instead of normal block model
+exampleFlower.canBeBrokenByHand = true; // Does it drops when broken by hand
+if AxoAPI_RegisterBlock(&exampleFlower)
+        AxoAPI_Log("Example Flower DONE.");
+else
+        AxoAPI_Log("Example Flower ERROR.");
+```
+And you're done!
+
 ### Adding textures
 In the folder with manifest.json and mod.dll, you should have a textures folder with two subfolders: terrain and items. In the terrain folder you put block textures, and in the items folder you put item textures.
 
