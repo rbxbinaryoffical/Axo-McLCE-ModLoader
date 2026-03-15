@@ -251,7 +251,7 @@ Creating recipes here is a bit harder than with others. Here is a table showing 
 
 Now you know how to add custom recipes using Axo!
 
-### Custom ore generation in nether
+### Custom ore generation in the nether
 It's simple!
 ```
 AxoBlockDef exampleNetherOre;
@@ -275,6 +275,7 @@ if AxoAPI_RegisterBlock(&exampleNetherOre)
 else
         AxoAPI_Log("Example Nether Ore ERROR.");
 ```
+Done!
 
 ### Adding textures
 In the folder with manifest.json and mod.dll, you should have a textures folder with two subfolders: terrain and items. In the terrain folder you put block textures, and in the items folder you put item textures.
