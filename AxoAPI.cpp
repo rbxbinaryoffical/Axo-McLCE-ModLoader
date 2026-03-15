@@ -2,6 +2,7 @@
 
 #include "AxoAPI.h"
 #include "AxoModLoader.h"
+#include "AxoWorldGen.h"
 
 #include <vector>
 #include <string>
@@ -24,9 +25,78 @@ static int sNextItemId  = 422;
 static int sNextBlockId = 174;
 
 struct RegisteredItem  { int id; int creativeTab; std::string name; };
-struct RegisteredBlock { int id; int creativeTab; };
+struct RegisteredBlock { int id; int creativeTab; std::string name; };
 static std::vector<RegisteredItem>  sRegisteredItems;
 static std::vector<RegisteredBlock> sRegisteredBlocks;
+
+static const std::unordered_map<std::string, int>& GetVanillaTileMap() {
+    static const std::unordered_map<std::string, int> kMap = {
+        {"stone",                  1}, {"grass",                  2}, {"dirt",                   3},
+        {"cobblestone",            4}, {"wood",                   5}, {"sapling",                6},
+        {"bedrock",                7}, {"water",                  8}, {"water_still",             9},
+        {"lava",                  10}, {"lava_still",            11}, {"sand",                  12},
+        {"gravel",                13}, {"gold_ore",              14}, {"iron_ore",              15},
+        {"coal_ore",              16}, {"log",                   17}, {"leaves",                18},
+        {"sponge",                19}, {"glass",                 20}, {"lapis_ore",             21},
+        {"lapis_block",           22}, {"dispenser",             23}, {"sandstone",             24},
+        {"noteblock",             25}, {"bed",                   26}, {"rail_powered",          27},
+        {"rail_detector",         28}, {"piston_sticky",         29}, {"web",                   30},
+        {"tallgrass",             31}, {"deadbush",              32}, {"piston",                33},
+        {"piston_head",           34}, {"wool",                  35}, {"flower",                37},
+        {"rose",                  38}, {"mushroom_brown",        39}, {"mushroom_red",          40},
+        {"gold_block",            41}, {"iron_block",            42}, {"double_slab",           43},
+        {"slab",                  44}, {"brick_block",           45}, {"tnt",                   46},
+        {"bookshelf",             47}, {"mossy_cobblestone",     48}, {"obsidian",              49},
+        {"torch",                 50}, {"fire",                  51}, {"spawner",               52},
+        {"stairs_wood",           53}, {"chest",                 54}, {"redstone_wire",         55},
+        {"diamond_ore",           56}, {"diamond_block",         57}, {"workbench",             58},
+        {"crops",                 59}, {"farmland",              60}, {"furnace",               61},
+        {"furnace_lit",           62}, {"sign_post",             63}, {"door_wood",             64},
+        {"ladder",                65}, {"rail",                  66}, {"stairs_stone",          67},
+        {"sign_wall",             68}, {"lever",                 69}, {"pressure_plate_stone",  70},
+        {"door_iron",             71}, {"pressure_plate_wood",   72}, {"redstone_ore",          73},
+        {"redstone_ore_lit",      74}, {"torch_redstone",        75}, {"torch_redstone_lit",    76},
+        {"button_stone",          77}, {"snow_layer",            78}, {"ice",                   79},
+        {"snow_block",            80}, {"cactus",                81}, {"clay_block",            82},
+        {"reeds",                 83}, {"jukebox",               84}, {"fence",                 85},
+        {"pumpkin",               86}, {"netherrack",            87}, {"soulsand",              88},
+        {"glowstone",             89}, {"portal",                90}, {"pumpkin_lit",           91},
+        {"cake",                  92}, {"repeater",              93}, {"repeater_lit",          94},
+        {"trapdoor",              96}, {"silverfish",            97}, {"stonebrick",            98},
+        {"mushroom_cap_brown",    99}, {"mushroom_cap_red",     100}, {"iron_bars",            101},
+        {"glass_pane",           102}, {"melon",                103}, {"pumpkin_stem",         104},
+        {"melon_stem",           105}, {"vine",                 106}, {"fence_gate",           107},
+        {"stairs_brick",         108}, {"stairs_stonebrick",    109}, {"mycelium",             110},
+        {"lilypad",              111}, {"nether_brick_block",   112}, {"nether_brick_fence",   113},
+        {"stairs_netherbrick",   114}, {"nether_wart",          115}, {"enchanting_table",     116},
+        {"brewing_stand",        117}, {"cauldron",             118}, {"end_portal",           119},
+        {"end_portal_frame",     120}, {"end_stone",            121}, {"dragon_egg",           122},
+        {"redstone_lamp",        123}, {"redstone_lamp_lit",    124}, {"stairs_sandstone",     128},
+        {"emerald_ore",          129}, {"ender_chest",          130}, {"tripwire_hook",        131},
+        {"tripwire",             132}, {"emerald_block",        133}, {"stairs_spruce",        134},
+        {"stairs_birch",         135}, {"stairs_jungle",        136}, {"command_block",        137},
+        {"beacon",               138}, {"cobblestone_wall",     139}, {"flower_pot",           140},
+        {"carrots",              141}, {"potatoes",             142}, {"button_wood",          143},
+        {"skull",                144}, {"anvil",                145}, {"chest_trapped",        146},
+        {"pressure_plate_gold",  147}, {"pressure_plate_iron",  148}, {"comparator",          149},
+        {"comparator_lit",       150}, {"daylight_sensor",      151}, {"redstone_block",       152},
+        {"quartz_ore",           153}, {"hopper",               154}, {"quartz_block",         155},
+        {"stairs_quartz",        156}, {"rail_activator",       157}, {"dropper",              158},
+    };
+    return kMap;
+}
+
+static int ResolveTileName(const std::string& name) {
+    if (name.empty()) return 0;
+    const auto& map = GetVanillaTileMap();
+    auto it = map.find(name);
+    if (it != map.end()) return it->second;
+    for (const auto& r : sRegisteredBlocks) {
+        if (r.name == name) return r.id;
+    }
+    printf("[AxoLoader] ResolveTileName: unknown tile \"%s\"\n", name.c_str());
+    return 0;
+}
 
 static const std::unordered_map<std::string, int>& GetVanillaItemMap() {
     static const std::unordered_map<std::string, int> kMap = {
@@ -173,17 +243,25 @@ void AxoAPI_FlushBlockRegistrations() {
     printf("[AxoLoader] FlushBlockRegistrations: %u block(s)...\n", (unsigned)sPendingBlocks.size());
     for (const auto& def : sPendingBlocks) {
         AxoBlockDefInternal internal;
-        internal.id          = def.id;
-        internal.iconName    = def.iconName;
-        internal.name        = def.name;
-        internal.material    = def.material;
-        internal.hardness    = def.hardness;
-        internal.resistance  = def.resistance;
-        internal.creativeTab = def.creativeTab;
-        internal.dropItemId  = ResolveDropItemName(def.dropItemName, def.id);
-        internal.dropCount   = def.dropCount;
-        if (AxoBlock_CreateFromDef(internal))
-            sRegisteredBlocks.push_back({def.id, def.creativeTab});
+        internal.id            = def.id;
+        internal.iconName      = def.iconName;
+        internal.name          = def.name;
+        internal.material      = def.material;
+        internal.hardness      = def.hardness;
+        internal.resistance    = def.resistance;
+        internal.creativeTab   = def.creativeTab;
+        internal.dropItemId    = ResolveDropItemName(def.dropItemName, def.id);
+        internal.dropCount     = def.dropCount;
+        internal.renderShape       = def.renderShape;
+        internal.noCollision       = def.noCollision;
+        internal.canBeBrokenByHand = def.canBeBrokenByHand;
+        internal.placeOnTileId     = ResolveTileName(def.canBePlacedOnlyOn);
+        internal.spawn         = def.spawn;
+        internal.onDestroyed   = def.onDestroyed;
+        if (AxoBlock_CreateFromDef(internal)) {
+            sRegisteredBlocks.push_back({def.id, def.creativeTab, def.name});
+            AxoWorldGen_RegisterSpawn(def.id, def.spawn);
+        }
     }
     sPendingBlocks.clear();
 }
@@ -209,6 +287,16 @@ int AxoAPI_ResolveItemName(const std::string& name) {
     auto it = map.find(name);
     if (it != map.end()) return it->second;
     for (const auto& r : sRegisteredItems) {
+        if (r.name == name) return r.id;
+    }
+    for (const auto& r : sRegisteredBlocks) {
+        if (r.name == name) return r.id;
+    }
+    return -1;
+}
+
+int AxoAPI_ResolveBlockName(const std::string& name) {
+    for (const auto& r : sRegisteredBlocks) {
         if (r.name == name) return r.id;
     }
     return -1;
