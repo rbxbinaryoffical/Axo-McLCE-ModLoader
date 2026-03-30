@@ -39,16 +39,19 @@ If you want to create mods for AxoLoader you can read under this section about m
 - [x] Custom block generation in the world and nether
 - [x] Custom plants
 - [x] Cross texture blocks
+- [x] Custom block models
+- [x] Custom World Gen (Custom biomes)
+- [x] Multi sided texture for blocks
+- [x] Custom plants with seeds
+- [x] Food effects
 
 **WIP AxoAPI features:**
 - [ ] Custom entities
-- [ ] Custom block models
 - [ ] Custom item models
+- [ ] Custom armor
 
 **AxoAPI features that are in plans:**
 - [ ] Custom dimensions
-- [ ] Custom World Gen
-- [ ] Custom armor
 - [ ] And many more!
 
 ## Making Mods
@@ -61,6 +64,8 @@ Every Axo mod needs 3 files:
 - textures:
   - items (only if you add items)
   - terrain (only if you add blocks)
+- models:
+  - blocks (only if you add 3D blocks)
 
 ### Creating mod.dll
 1. Create blank c++ project in VS 2022. Configure the project for the dll export. Download AxoAPI.h from **[here](https://github.com/KaDerox/Axo-McLCE-ModLoader/releases)** and place it in the source files
@@ -333,11 +338,107 @@ else
 ```
 And you're done!
 
+### Blocks with custom models
+It's the same as block but with some flags
+```
+AxoBlockDef rubySlab;
+rubySlab.name        = "Ruby Slab";
+rubySlab.iconName    = L"ruby_slab_top";
+rubySlab.hardness    = 1.5f;
+rubySlab.resistance  = 10.0f;
+rubySlab.creativeTab = AxoTab_BuildingBlocks;
+rubySlab.customModel = "ruby_slab"; // JSON model from models/blocks
+AxoAPI_RegisterBlock(&rubySlab);
+```
+
+### Multi texture blocks
+```
+AxoBlockDef myBlock;
+myBlock.name = "Crystal Log";
+myBlock.iconName = L"crystal_log_side"; // Placeholder image
+myBlock.hasDifferentSides = true;
+myBlock.iconTop = L"crystal_log_top"; // Top texture
+myBlock.iconBottom = L"crystal_log_top"; // Bottom texture
+myBlock.iconNorth = L"crystal_log_side"; // North texture
+myBlock.iconSouth = L"crystal_log_side"; // South texture
+myBlock.iconEast = L"crystal_log_side"; // East texture
+myBlock.iconWest = L"crystal_log_side"; // West texture
+AxoAPI_RegisterBlock(&myBlock);
+```
+
+### Custom crops with seeds 
+```
+AxoCropDef crop;
+crop.name = "Crop";
+// Crop Stages from textures/terrain
+crop.stageTextures[0] = L"crop_stage_0";
+crop.stageTextures[1] = L"crop_stage_1";
+crop.stageTextures[2] = L"crop_stage_2";
+crop.stageTextures[3] = L"crop_stage_3";
+crop.stageTextures[4] = L"crop_stage_4";
+crop.stageTextures[5] = L"crop_stage_5";
+crop.stageTextures[6] = L"crop_stage_6";
+crop.stageTextures[7] = L"crop_stage_7";
+// Seed creation
+crop.seedIconName    = L"crop_seeds";
+crop.seedName        = "Crop Seeds";
+crop.seedCreativeTab = AxoTab_ToolsArmor;
+// Grown crop drop
+crop.growDrop.itemName      = "Custom Item";
+crop.growDrop.count         = 1;
+crop.growDrop.seedDropCount = 1;
+crop.growDrop.bonusDropMax  = 2;
+
+AxoAPI_RegisterCrop(&crop);
+```
+
+### Food Effects
+```
+AxoItemDef magicfood;
+magicfood.name        = "Magic Food";
+magicfood.iconName    = L"magic_food";
+magicfood.creativeTab = AxoTab_Food;
+magicfood.isEdible    = true;
+magicfood.food.nutrition  = 4;
+magicfood.food.canAlwaysEat = true;
+magicfood.food.saturation = AXO_SATURATION_NORMAL;
+magicfood.food.effect.effectName = "nausea"; // Effect you want to give
+magicfood.food.effect.duration = 200;
+magicfood.food.effect.amplifier = 0;
+
+AxoAPI_RegisterItem(&magicfood);
+```
+
+### Custom biomes
+Simple guide for adding custom biomes
+```
+AxoBiomeDef crystalForest;
+crystalForest.name         = "Crystal Forest";
+crystalForest.temperature  = 0.7f;
+crystalForest.downfall     = 0.8f;
+crystalForest.depth        = 0.1f;
+crystalForest.scale        = 0.3f;
+crystalForest.grassColor   = 0x00FF88; // Hex colour but # is 0x
+crystalForest.foliageColor = 0x00CC66; // Hex colour but # is 0x
+crystalForest.waterColor   = 0x0055FF; // Hex colour but # is 0x
+crystalForest.skyColor     = 0x88DDFF; // Hex colour but # is 0x
+crystalForest.hasRain      = true;
+crystalForest.hasSnow      = false;
+crystalForest.spawnWeight  = 8; // How often it spawns
+crystalForest.treeCount    = 5;
+crystalForest.grassCount   = 3;
+crystalForest.flowerCount  = 4;
+crystalForest.topMaterial  = "grass";
+crystalForest.material     = "dirt";
+crystalForest.hilliness = 1.0f;
+AxoAPI_RegisterBiome(&crystalForest);
+```
+
 ### Adding textures
 In the folder with manifest.json and mod.dll, you should have a textures folder with two subfolders: terrain and items. In the terrain folder you put block textures, and in the items folder you put item textures.
 
 ### Exporting a finished mod
-It is pretty simple! Just compress manifest.json, mod.dll, and the textures folder into a zip file and you're done! You can put it into the mods folder and it should work.
+It is pretty simple! Just compress manifest.json, mod.dll, models folder and the textures folder into a zip file and you're done! You can put it into the mods folder and it should work.
 
 ## FAQ
 - **Q**: Was AI used to create Axo?
