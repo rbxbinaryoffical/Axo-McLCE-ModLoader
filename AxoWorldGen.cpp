@@ -13,6 +13,7 @@
 #include "..\..\Minecraft.World\Biome.h"
 
 #include "AxoAPI.h"
+#include "AxoWorldGen.h"
 
 struct AxoSpawnEntry {
     int              blockId;
@@ -20,6 +21,16 @@ struct AxoSpawnEntry {
 };
 
 static std::vector<AxoSpawnEntry> sSpawnEntries;
+static std::vector<AxoBiomeSpawnEntry> sBiomeSpawnEntries;
+
+void AxoWorldGen_RegisterBiomeSpawn(int biomeId, int weight) {
+    sBiomeSpawnEntries.push_back({biomeId, weight});
+    printf("[AxoLoader] Registered biome spawn id=%d weight=%d\n", biomeId, weight);
+}
+
+const std::vector<AxoBiomeSpawnEntry>& AxoWorldGen_GetCustomBiomes() {
+    return sBiomeSpawnEntries;
+}
 
 void AxoWorldGen_RegisterSpawn(int blockId, const AxoBlockSpawnDef& spawn) {
     if (!spawn.enabled) return;
