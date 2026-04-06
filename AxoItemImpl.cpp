@@ -72,7 +72,7 @@ public:
     bool                   mIsAxe;
     bool                   mIsShovel;
 
-    explicit AxoItem(const AxoItemDef& def)
+    explicit AxoItem(const AxoItemDefI& def)
         : Item(def.id - 256)
         , mIconName(def.iconName)
         , mDisplayName(def.name)
@@ -153,7 +153,7 @@ public:
     int                    mEffectDuration;
     int                    mEffectAmplifier;
 
-    explicit AxoFoodItem(const AxoItemDef& def)
+    explicit AxoFoodItem(const AxoItemDefI& def)
         : FoodItem(def.id - 256, def.food.nutrition, def.food.saturation, def.food.isMeat)
         , mIconName(def.iconName)
         , mDisplayName(def.name)
@@ -234,7 +234,7 @@ public:
     }
 };
 
-bool AxoItem_CreateFromDef(const AxoItemDef& def) {
+bool AxoItem_CreateFromDef(const AxoItemDefI& def) {
     printf("[AxoLoader] CreateFromDef id=%d edible=%d nutrition=%d sat=%.2f isMeat=%d\n",
         def.id, (int)def.isEdible, def.food.nutrition, def.food.saturation, (int)def.food.isMeat);
     fflush(stdout);
