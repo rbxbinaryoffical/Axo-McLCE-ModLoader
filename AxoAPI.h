@@ -29,6 +29,7 @@ enum AxoCreativeTab {
     AxoTab_ToolsArmor     = 6,
     AxoTab_Brewing        = 7,
     AxoTab_Misc           = 12,
+    AxoTab_Mods           = 15,
 };
 
 #define AXO_SATURATION_POOR          0.1f
@@ -210,6 +211,9 @@ struct AxoAPITable {
     bool (*StrikeLightning)(Level* level, double x, double y, double z);
     bool (*SpawnTnt)(Level* level, double x, double y, double z, int fuse);
     bool (*SpawnFallingBlock)(Level* level, double x, double y, double z, int tileId, int data);
+    bool (*Explode)(Level* level, double x, double y, double z, float radius, bool fire, bool destroyBlocks);
+    // --- Creative tab registration (v2) ---
+    int  (*RegisterCreativeTab)(const wchar_t* name);
 };
 
 #ifndef MOD_ID
@@ -520,3 +524,5 @@ inline AxoCropDefI ToInternal(const AxoCropDef& d) {
 #define AxoAPI_StrikeLightning(lv,x,y,z)         (gAxoAPI->StrikeLightning(lv,x,y,z))
 #define AxoAPI_SpawnTnt(lv,x,y,z,fuse)           (gAxoAPI->SpawnTnt(lv,x,y,z,fuse))
 #define AxoAPI_SpawnFallingBlock(lv,x,y,z,tid,d) (gAxoAPI->SpawnFallingBlock(lv,x,y,z,tid,d))
+#define AxoAPI_Explode(lv,x,y,z,r,f,d)           (gAxoAPI->Explode(lv,x,y,z,r,f,d))
+#define AxoAPI_RegisterCreativeTab(name)           (gAxoAPI->RegisterCreativeTab(name))

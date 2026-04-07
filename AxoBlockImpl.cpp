@@ -321,7 +321,7 @@ bool AxoBlock_CreateFromDef(const AxoBlockDefInternal& def) {
 
 void AxoBlock_AddToCreativeMenu(int blockId, int creativeTab) {
     IUIScene_CreativeMenu::ECreative_Inventory_Groups group = IUIScene_CreativeMenu::eCreativeInventory_BuildingBlocks;
-    if (creativeTab >= 0 && creativeTab < IUIScene_CreativeMenu::eCreativeInventoryGroupsCount)
+    if (creativeTab >= 0 && creativeTab < IUIScene_CreativeMenu::totalGroupCount())
         group = (IUIScene_CreativeMenu::ECreative_Inventory_Groups)creativeTab;
     IUIScene_CreativeMenu::AxoAddToGroup(group, shared_ptr<ItemInstance>(new ItemInstance(blockId, 1, 0)));
     printf("[AxoLoader] Added block id=%d to creative group %d\n", blockId, (int)group);
