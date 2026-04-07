@@ -58,6 +58,33 @@ struct AxoFoodDef {
     AxoFoodEffect effect;
 };
 
+// ── Armor ────────────────────────────────────────────────────────────────────
+
+enum AxoArmorSlot {
+    AXO_ARMOR_HEAD  = 0,
+    AXO_ARMOR_TORSO = 1,
+    AXO_ARMOR_LEGS  = 2,
+    AXO_ARMOR_FEET  = 3,
+};
+
+struct AxoArmorMaterialDef {
+    const char* name                  = "custom";
+    int         durabilityMultiplier  = 15;          // multiplied by per-slot base (11,16,15,13)
+    int         slotProtections[4]    = {2, 6, 5, 2}; // head, torso, legs, feet
+    int         enchantability        = 9;
+    const char* repairItemName        = "";           // e.g. "iron_ingot"
+};
+
+struct AxoArmorDef {
+    AxoArmorSlot         slot         = AXO_ARMOR_HEAD;
+    int                  modelIndex   = 2;             // render index (0=cloth,1=chain,2=iron,3=diamond,4=gold, or auto-assigned)
+    AxoArmorMaterialDef  material;
+    bool                 isDyeable    = false;          // leather-like color support
+    int                  defaultColor = 0xA06540;       // default color if dyeable (RGB)
+    void               (*onArmorTick)(Level*, Player*, ItemInstance*) = nullptr;
+    const char*          armorTextureName = "";  // e.g. "OakWoodArmor" -> armor/OakWoodArmor_1.png, _2.png
+};
+
 struct AxoItemDef {
     int              id           = AXO_ID_AUTO;
     const wchar_t*   iconName     = L"";
@@ -74,6 +101,8 @@ struct AxoItemDef {
     bool             isHandheld   = false;
     bool             isEdible     = false;
     AxoFoodDef       food;
+    bool             isArmor      = false;
+    AxoArmorDef      armor;
 };
 
 // ── Blocks ──────────────────────────────────────────────────────────────────

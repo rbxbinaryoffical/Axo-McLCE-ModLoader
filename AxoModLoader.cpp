@@ -492,10 +492,16 @@ Icon* AxoModLoader_GetTerrainIcon(const std::wstring& name) {
 struct AtlasSlot { int row, col; };
 
 static const AtlasSlot kFreeSlots[] = {
+    // Scattered unused cells in existing rows
     {10,1},{10,2},{10,6},
     {11,1},{11,2},{11,3},{11,4},{11,5},{11,6},
     {12,1},{12,2},{12,3},{12,4},{12,5},{12,6},{12,8},
     {14,5},{14,6},
+    // Row 13 is completely unused in vanilla (16 slots)
+    {13,0},{13,1},{13,2},{13,3},{13,4},{13,5},{13,6},{13,7},
+    {13,8},{13,9},{13,10},{13,11},{13,12},{13,13},{13,14},{13,15},
+    // Row 15 cols 12-15 unused (records end at col 11)
+    {15,12},{15,13},{15,14},{15,15},
 };
 static const int kFreeSlotsCount = (int)(sizeof(kFreeSlots)/sizeof(kFreeSlots[0]));
 static int sNextFreeSlot = 0;
@@ -744,6 +750,42 @@ done_terrain:
             printf("[AxoLoader] Stored model JSON: %s\n", modelName.c_str());
         } while (FindNextFileA(hFindM, &fdm));
         FindClose(hFindM);
+    }
+
+    // ── Copy armor model textures (textures/models/armor/*.png -> armor/) ──
+    {
+        std::string armorDestDir = "Common\\res\\1_2_2\\armor";
+        MakeDirs(armorDestDir);
+        for (size_t i = 0; i < zips.size(); ++i) {
+            std::string stem   = GetStem(GetFilename(zips[i]));
+            std::string tmpDir = PathJoin(PathJoin(modsDir, "_tmp"), stem);
+            std::string armorSrcDir = PathJoin(PathJoin(PathJoin(tmpDir, "textures"), "models"), "armor");
+            if (!PathExists(armorSrcDir)) continue;
+
+            WIN32_FIND_DATAA fda;
+            HANDLE hFindA = FindFirstFileA(PathJoin(armorSrcDir, "*.png").c_str(), &fda);
+            if (hFindA == INVALID_HANDLE_VALUE) continue;
+            do {
+                std::string srcFile = PathJoin(armorSrcDir, fda.cFileName);
+                std::string destName = fda.cFileName;
+
+                // Forge uses _layer_1 / _layer_2, LCE uses _1 / _2
+                size_t pos;
+                pos = destName.find("_layer_1");
+                if (pos != std::string::npos)
+                    destName.replace(pos, 8, "_1");
+                pos = destName.find("_layer_2");
+                if (pos != std::string::npos)
+                    destName.replace(pos, 8, "_2");
+
+                std::string destFile = PathJoin(armorDestDir, destName);
+                if (CopyFileA(srcFile.c_str(), destFile.c_str(), FALSE))
+                    printf("[AxoLoader] Copied armor texture: %s -> %s\n", fda.cFileName, destName.c_str());
+                else
+                    printf("[AxoLoader] FAILED to copy armor texture: %s\n", fda.cFileName);
+            } while (FindNextFileA(hFindA, &fda));
+            FindClose(hFindA);
+        }
     }
 
     AxoAPITable* apiTableV2 = AxoAPI_GetTable();

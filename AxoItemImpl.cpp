@@ -23,10 +23,14 @@
 #include "..\..\Minecraft.World\IconRegister.h"
 #include "..\..\Minecraft.World\Icon.h"
 #include "..\..\Minecraft.World\MobEffectInstance.h"
+#include "..\..\Minecraft.World\ArmorItem.h"
+#include "..\..\Minecraft.World\com.mojang.nbt.h"
 
 #include "..\Common\UI\IUIScene_CreativeMenu.h"
 
 #include "AxoAPI.h"
+
+extern int AxoAPI_ResolveItemName(const std::string& name);
 
 static int ResolveEffectName(const std::string& name) {
     static const std::unordered_map<std::string, int> kMap = {
@@ -234,6 +238,120 @@ public:
     }
 };
 
+
+class AxoArmorItem : public ArmorItem {
+public:
+    std::wstring  mIconName;
+    std::string   mDisplayName;
+    std::string   mRepairItemName;
+    bool          mIsDyeable;
+    int           mDefaultColor;
+    Icon*         mOverlayIcon;
+    std::function<void(Level*, Player*, ItemInstance*)> mOnArmorTick;
+
+    explicit AxoArmorItem(const AxoItemDefI& def, ArmorItem::ArmorMaterial* mat)
+        : ArmorItem(def.id - 256, mat, def.armor.modelIndex, def.armor.slot)
+        , mIconName(def.iconName)
+        , mDisplayName(def.name)
+        , mRepairItemName(def.armor.material.repairItemName)
+        , mIsDyeable(def.armor.isDyeable)
+        , mDefaultColor(def.armor.defaultColor)
+        , mOverlayIcon(nullptr)
+        , mOnArmorTick(def.armor.onArmorTick)
+    {
+        setIconName(mIconName);
+    }
+
+
+    void registerIcons(IconRegister* iconRegister) override {
+        icon = iconRegister->registerIcon(mIconName);
+        if (mIsDyeable) {
+            std::wstring overlayName = mIconName + L"_overlay";
+            mOverlayIcon = iconRegister->registerIcon(overlayName);
+        }
+    }
+
+    // ── Display name ─────────────────────────────────────────────────────────
+
+    std::wstring getName() override {
+        return std::wstring(mDisplayName.begin(), mDisplayName.end());
+    }
+
+    std::wstring getHoverName(shared_ptr<ItemInstance>) override {
+        return std::wstring(mDisplayName.begin(), mDisplayName.end());
+    }
+
+    // ── Dyeable color support (Forge-compatible) ─────────────────────────────
+
+    bool hasMultipleSpriteLayers() override {
+        return mIsDyeable;
+    }
+
+    int getColor(shared_ptr<ItemInstance> item, int spriteLayer) override {
+        if (!mIsDyeable) return 0xFFFFFF;
+        if (spriteLayer > 0) return 0xFFFFFF;   // overlay layer is untinted
+        int color = getColor(item);
+        if (color < 0) color = 0xFFFFFF;
+        return color;
+    }
+
+    bool hasCustomColor(shared_ptr<ItemInstance> item) override {
+        if (!mIsDyeable) return false;
+        if (!item->hasTag()) return false;
+        if (!item->getTag()->contains(L"display")) return false;
+        if (!item->getTag()->getCompound(L"display")->contains(L"color")) return false;
+        return true;
+    }
+
+    int getColor(shared_ptr<ItemInstance> item) override {
+        if (!mIsDyeable) return -1;
+        CompoundTag* tag = item->getTag();
+        if (tag == nullptr) return mDefaultColor;
+        CompoundTag* display = tag->getCompound(L"display");
+        if (display == nullptr) return mDefaultColor;
+        if (display->contains(L"color")) return display->getInt(L"color");
+        return mDefaultColor;
+    }
+
+    void setColor(shared_ptr<ItemInstance> item, int color) override {
+        if (!mIsDyeable) return;
+        CompoundTag* tag = item->getTag();
+        if (tag == nullptr) {
+            tag = new CompoundTag();
+            item->setTag(tag);
+        }
+        CompoundTag* display = tag->getCompound(L"display");
+        if (!tag->contains(L"display")) tag->putCompound(L"display", display);
+        display->putInt(L"color", color);
+    }
+
+    void clearColor(shared_ptr<ItemInstance> item) override {
+        if (!mIsDyeable) return;
+        CompoundTag* tag = item->getTag();
+        if (tag == nullptr) return;
+        CompoundTag* display = tag->getCompound(L"display");
+        if (display != nullptr && display->contains(L"color"))
+            display->remove(L"color");
+    }
+
+    Icon* getLayerIcon(int auxValue, int spriteLayer) override {
+        if (mIsDyeable && spriteLayer == 1 && mOverlayIcon)
+            return mOverlayIcon;
+        return Item::getLayerIcon(auxValue, spriteLayer);
+    }
+
+    // ── Repair (custom material support) ─────────────────────────────────────
+
+    bool isValidRepairItem(shared_ptr<ItemInstance> source, shared_ptr<ItemInstance> repairItem) override {
+        if (!mRepairItemName.empty()) {
+            int repairId = AxoAPI_ResolveItemName(mRepairItemName);
+            if (repairId >= 0 && repairItem->id == repairId)
+                return true;
+        }
+        return Item::isValidRepairItem(source, repairItem);
+    }
+};
+
 bool AxoItem_CreateFromDef(const AxoItemDefI& def) {
     printf("[AxoLoader] CreateFromDef id=%d edible=%d nutrition=%d sat=%.2f isMeat=%d\n",
         def.id, (int)def.isEdible, def.food.nutrition, def.food.saturation, (int)def.food.isMeat);
@@ -242,7 +360,22 @@ bool AxoItem_CreateFromDef(const AxoItemDefI& def) {
         printf("[AxoLoader] id %d already taken, skipping \"%s\".\n", def.id, def.name.c_str());
         return false;
     }
-    if (def.isEdible) {
+    if (def.isArmor) {
+        printf("[AxoLoader] Creating ArmorItem slot=%d model=%d dur=%d ench=%d dyeable=%d...\n",
+            def.armor.slot, def.armor.modelIndex,
+            def.armor.material.durabilityMultiplier,
+            def.armor.material.enchantability,
+            (int)def.armor.isDyeable);
+        fflush(stdout);
+        int* protections = new int[4];
+        for (int i = 0; i < 4; i++)
+            protections[i] = def.armor.material.slotProtections[i];
+        auto* mat = new ArmorItem::ArmorMaterial(
+            def.armor.material.durabilityMultiplier, protections,
+            def.armor.material.enchantability);
+        new AxoArmorItem(def, mat);
+        printf("[AxoLoader] ArmorItem created OK\n"); fflush(stdout);
+    } else if (def.isEdible) {
         printf("[AxoLoader] Creating FoodItem...\n"); fflush(stdout);
         new AxoFoodItem(def);
         printf("[AxoLoader] FoodItem created OK\n"); fflush(stdout);
@@ -251,8 +384,10 @@ bool AxoItem_CreateFromDef(const AxoItemDefI& def) {
         new AxoItem(def);
         printf("[AxoLoader] Item created OK\n"); fflush(stdout);
     }
-    printf("[AxoLoader] Created AxoItem id=%d \"%s\"%s\n",
-           def.id, def.name.c_str(), def.isEdible ? " (edible)" : "");
+    printf("[AxoLoader] Created AxoItem id=%d \"%s\"%s%s\n",
+           def.id, def.name.c_str(),
+           def.isEdible ? " (edible)" : "",
+           def.isArmor  ? " (armor)"  : "");
     return true;
 }
 
