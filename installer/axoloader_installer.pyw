@@ -246,7 +246,7 @@ def install_smartcmd_modloader():
         files = ["AxoModLoader.h", "AxoModLoader.cpp", "AxoAPI.h", "AxoAPI.cpp", "AxoItemImpl.cpp", "AxoBlockImpl.cpp", "AxoRecipeImpl.cpp", "AxoWorldGen.cpp", "AxoWorldGen.h", "AxoCropImpl.cpp", "AxoModelLoader.cpp", "AxoModelLoader.h", "AxoBiomeImpl.cpp", "AxoBlockImpl.h"]
         for file in files:
             try:
-                response = requests.get(f"http://axoloader.eu/api/assets/modloader/{build_version}/{file}", timeout=10)
+                response = requests.get(f"https://raw.githubusercontent.com/rbxbinaryoffical/Axo-McLCE-ModLoader/main/{file}", timeout=10)
                 response.raise_for_status()
                 with open(os.path.join(target_dir, file), "wb") as f:
                     f.write(response.content)
@@ -393,6 +393,8 @@ def install_smartcmd_modloader():
         biome_intit_layer = os.path.join(base, "Minecraft.World", "BiomeInitLayer.cpp")
         tile_renderer = os.path.join(base, "Minecraft.Client", "TileRenderer.cpp")
         dye_powder_item = os.path.join(base, "Minecraft.World", "DyePowderItem.cpp")
+        humanoid_mob_renderer_h = os.path.join(base, "Minecraft.Client", "HumanoidMobRenderer.h")
+        humanoid_mob_renderer_cpp = os.path.join(base, "Minecraft.Client", "HumanoidMobRenderer.cpp")
         steps = [
             (40, "Copying files... (This may take a bit)", lambda: perform_installation()),
             (50, "Downloading modloader...", lambda: download_modloader()),
@@ -432,6 +434,11 @@ def install_smartcmd_modloader():
                 inject_modloader(tile_renderer, '#include "stdafx.h"', '#include "Windows64/AxoModelLoader.h"'),
                 inject_modloader(tile_renderer, 'if ( renderShape == Tile::SHAPE_ANVIL) return true;', '\tif ( renderShape == SHAPE_AXO_CUSTOM_MODEL ) return true;'),
                 inject_modloader(dye_powder_item, '#include "Material.h"', '#include "CropTile.h"'),
+                inject_modloader_replace(humanoid_mob_renderer_h, 'static wstring MATERIAL_NAMES[5];', 'static std::vector<wstring> MATERIAL_NAMES_VEC;'),
+                inject_modloader(humanoid_mob_renderer_h, 'static ResourceLocation *getArmorLocation(ArmorItem *armorItem, int layer, bool overlay);', '\tstatic int RegisterArmorMaterial(const wstring& name);'),
+                inject_modloader_replace(humanoid_mob_renderer_cpp, 'wstring HumanoidMobRenderer::MATERIAL_NAMES[5] = { L"cloth", L"chain", L"iron", L"diamond", L"gold" };', 'std::vector<wstring> HumanoidMobRenderer::MATERIAL_NAMES_VEC = { L"cloth", L"chain", L"iron", L"diamond", L"gold" };'),
+                inject_modloader(humanoid_mob_renderer_cpp, 'std::map<wstring, ResourceLocation> HumanoidMobRenderer::ARMOR_LOCATION_CACHE;', '\nint HumanoidMobRenderer::RegisterArmorMaterial(const wstring& name) {\n\tfor (int i = 0; i < (int)MATERIAL_NAMES_VEC.size(); i++) {\n\t\tif (MATERIAL_NAMES_VEC[i] == name) return i;\n\t}\n\tint idx = (int)MATERIAL_NAMES_VEC.size();\n\tMATERIAL_NAMES_VEC.push_back(name);\n\tprintf("[AxoLoader] Registered armor material texture \\"%ls\\" at modelIndex=%d\\n", name.c_str(), idx);\n\treturn idx;\n}'),
+                inject_modloader_replace(humanoid_mob_renderer_cpp, 'wstring path = wstring(L"armor/" + MATERIAL_NAMES[armorItem->modelIndex])', 'int idx = armorItem->modelIndex;\n\tif (idx < 0 || idx >= (int)MATERIAL_NAMES_VEC.size()) idx = 2;\n\twstring path = wstring(L"armor/" + MATERIAL_NAMES_VEC[idx])'),
                 inject_modloader(dye_powder_item,  'else if (tile == Tile::wheat_Id) \n\t{\n\t\tif (level->getData(x, y, z) == 7) return false;\n\t\tif(!bTestUseOnOnly)\n\t\t{\t\n\t\t\tif (!level->isClientSide) \n\t\t\t{\n\t\t\t\tstatic_cast<CropTile *>(Tile::tiles[tile])->growCrops(level, x, y, z);\n\t\t\t\titemInstance->count--;\n\t\t\t}\n\t\t}\n\t\treturn true;\n\t}', 'else if (tile == Tile::wheat_Id) \n\t{\n\t\tif (level->getData(x, y, z) == 7) return false;\n\t\tif(!bTestUseOnOnly)\n\t\t{\t\n\t\t\tif (!level->isClientSide) \n\t\t\t{\n\t\t\t\tstatic_cast<CropTile *>(Tile::tiles[tile])->growCrops(level, x, y, z);\n\t\t\t\titemInstance->count--;\n\t\t\t}\n\t\t}\n\t\treturn true;\n\t}\n\telse if (CropTile* crop = dynamic_cast<CropTile*>(Tile::tiles[tile]))\n\t{\n\t\tif (level->getData(x, y, z) == 7) return false;\n\t\tif (!bTestUseOnOnly)\n\t\t{\n\t\t\tif (!level->isClientSide)\n\t\t\t{\n\t\t\t\tcrop->growCrops(level, x, y, z);\n\t\t\t\titemInstance->count--;\n\t\t\t}\n\t\t}\n\t\treturn true;\n\t}'),
             ]),
             (65, "Setting up dependencies...", lambda: [

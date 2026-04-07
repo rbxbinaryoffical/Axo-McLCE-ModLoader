@@ -20,10 +20,13 @@
 
 #include "..\..\Minecraft.World\Item.h"
 #include "..\..\Minecraft.World\FoodItem.h"
+#include "..\..\Minecraft.World\Item.h"
+#include "..\..\Minecraft.World\FoodItem.h"
+#include "..\..\Minecraft.World\ArmorItem.h"
 #include "..\..\Minecraft.World\IconRegister.h"
+#include "..\HumanoidMobRenderer.h"
 #include "..\..\Minecraft.World\Icon.h"
 #include "..\..\Minecraft.World\MobEffectInstance.h"
-#include "..\..\Minecraft.World\ArmorItem.h"
 #include "..\..\Minecraft.World\com.mojang.nbt.h"
 
 #include "..\Common\UI\IUIScene_CreativeMenu.h"
@@ -361,8 +364,15 @@ bool AxoItem_CreateFromDef(const AxoItemDefI& def) {
         return false;
     }
     if (def.isArmor) {
+        int modelIdx = def.armor.modelIndex;
+        if (!def.armor.armorTextureName.empty()) {
+            std::wstring wTexName(def.armor.armorTextureName.begin(), def.armor.armorTextureName.end());
+            modelIdx = HumanoidMobRenderer::RegisterArmorMaterial(wTexName);
+            printf("[AxoLoader] Registered armor material \"%s\" -> modelIndex %d\n",
+                   def.armor.armorTextureName.c_str(), modelIdx);
+        }
         printf("[AxoLoader] Creating ArmorItem slot=%d model=%d dur=%d ench=%d dyeable=%d...\n",
-            def.armor.slot, def.armor.modelIndex,
+            def.armor.slot, modelIdx,
             def.armor.material.durabilityMultiplier,
             def.armor.material.enchantability,
             (int)def.armor.isDyeable);
@@ -373,7 +383,10 @@ bool AxoItem_CreateFromDef(const AxoItemDefI& def) {
         auto* mat = new ArmorItem::ArmorMaterial(
             def.armor.material.durabilityMultiplier, protections,
             def.armor.material.enchantability);
-        new AxoArmorItem(def, mat);
+
+        AxoItemDefI defCopy = def;
+        defCopy.armor.modelIndex = modelIdx;
+        new AxoArmorItem(defCopy, mat);
         printf("[AxoLoader] ArmorItem created OK\n"); fflush(stdout);
     } else if (def.isEdible) {
         printf("[AxoLoader] Creating FoodItem...\n"); fflush(stdout);
