@@ -113,6 +113,7 @@ struct AxoBlockDef {
     AxoRenderShape   renderShape          = AxoShape_Cube;
     bool             noCollision          = false;
     bool             canBeBrokenByHand    = false;
+    bool             isTnt                = false;
     const char*      canBePlacedOnlyOn    = "";
     const char*      customModel          = "";
     bool             hasDifferentSides    = false;
@@ -296,6 +297,7 @@ struct AxoBlockDefInternal {
     AxoRenderShape   renderShape;
     bool             noCollision;
     bool             canBeBrokenByHand;
+    bool             isTnt;
     int              placeOnTileId;
     std::string      customModel;
     bool             hasDifferentSides;
@@ -322,6 +324,7 @@ struct AxoBlockDefI {
     AxoRenderShape   renderShape          = AxoShape_Cube;
     bool             noCollision          = false;
     bool             canBeBrokenByHand    = false;
+    bool             isTnt                = false;
     std::string      canBePlacedOnlyOn;
     std::string      customModel;
     bool             hasDifferentSides    = false;
@@ -443,6 +446,7 @@ inline AxoBlockDefI ToInternal(const AxoBlockDef& d) {
     r.renderShape   = d.renderShape;
     r.noCollision   = d.noCollision;
     r.canBeBrokenByHand = d.canBeBrokenByHand;
+    r.isTnt             = d.isTnt;
     r.canBePlacedOnlyOn = SafeStr(d.canBePlacedOnlyOn);
     r.customModel   = SafeStr(d.customModel);
     r.hasDifferentSides = d.hasDifferentSides;

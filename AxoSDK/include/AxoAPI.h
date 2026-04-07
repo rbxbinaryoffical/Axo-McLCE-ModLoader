@@ -119,6 +119,7 @@ struct AxoBlockDef {
     AxoRenderShape   renderShape          = AxoShape_Cube;
     bool             noCollision          = false;
     bool             canBeBrokenByHand    = false;
+    bool             isTnt                = false;
     const char*      canBePlacedOnlyOn    = "";
     const char*      customModel          = "";
     bool             hasDifferentSides    = false;

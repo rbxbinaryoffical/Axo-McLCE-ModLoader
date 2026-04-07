@@ -469,6 +469,7 @@ void AxoAPI_FlushBlockRegistrations() {
         internal.renderShape       = def.renderShape;
         internal.noCollision       = def.noCollision;
         internal.canBeBrokenByHand = def.canBeBrokenByHand;
+        internal.isTnt             = def.isTnt;
         internal.placeOnTileId     = ResolveTileName(def.canBePlacedOnlyOn);
         internal.customModel       = def.customModel;
         internal.hasDifferentSides = def.hasDifferentSides;

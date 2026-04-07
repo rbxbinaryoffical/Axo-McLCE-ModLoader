@@ -34,6 +34,38 @@
 bool AxoModLoader_IsTerrainIconQueued(const std::wstring& name);
 int  AxoAPI_ResolveItemName(const std::string& name);
 
+class AxoPrimedTnt : public PrimedTnt {
+    std::function<void(int, int, int, Level*, Player*, ItemInstance*)> mCallback;
+public:
+    AxoPrimedTnt(Level* level, double px, double py, double pz,
+                 shared_ptr<LivingEntity> igniter,
+                 std::function<void(int, int, int, Level*, Player*, ItemInstance*)> callback)
+        : PrimedTnt(level, px, py, pz, igniter)
+        , mCallback(std::move(callback))
+    {}
+
+    eINSTANCEOF GetType() override { return eTYPE_PRIMEDTNT; }
+
+    void tick() override {
+        xo = x; yo = y; zo = z;
+        yd -= 0.04f;
+        move(xd, yd, zd);
+        xd *= 0.98f; yd *= 0.98f; zd *= 0.98f;
+        if (onGround) {
+            xd *= 0.7f; zd *= 0.7f;
+            yd *= -0.5f;
+        }
+        if (life-- <= 0) {
+            remove();
+            if (!level->isClientSide && mCallback) {
+                mCallback((int)x, (int)y, (int)z, level, nullptr, nullptr);
+            }
+        } else {
+            level->addParticle(eParticleType_smoke, x, y + 0.5f, z, 0, 0, 0);
+        }
+    }
+};
+
 class AxoBlock : public Tile {
     std::string    mDisplayName;
     int            mDropItemId;
@@ -46,6 +78,7 @@ class AxoBlock : public Tile {
     bool           mHasDifferentSides;
     std::wstring   mIconNameFaces[6];
     Icon*          mFaceIcons[6];
+    bool           mIsTnt;
     std::function<void(int, int, int, Level*, Player*, ItemInstance*)> mOnDestroyed;
 
     static Player*                  sLastPlayer;
@@ -63,6 +96,7 @@ public:
         , mPlaceOnTileId(def.placeOnTileId)
         , mCustomModel(def.customModel)
         , mHasDifferentSides(def.hasDifferentSides)
+        , mIsTnt(def.isTnt)
         , mOnDestroyed(def.onDestroyed)
     {
         printf("[AxoBlock] CTOR id=%d name=%s def.onDestroyed=%d mOnDestroyed=%d\n",
@@ -253,11 +287,15 @@ public:
     }
 
     void playerDestroy(Level* level, shared_ptr<Player> player, int x, int y, int z, int data) override {
-        printf("[AxoBlock] playerDestroy id=%d at %d,%d,%d mOnDestroyed=%d\n", id, x, y, z, (bool)mOnDestroyed);
+        printf("[AxoBlock] playerDestroy id=%d at %d,%d,%d mOnDestroyed=%d isTnt=%d\n", id, x, y, z, (bool)mOnDestroyed, mIsTnt);
         fflush(stdout);
         sLastPlayer = player.get();
         sLastItem   = player ? player->inventory->getSelected() : nullptr;
         Tile::playerDestroy(level, player, x, y, z, data);
+        if (mIsTnt) {
+            Tile::spawnResources(level, x, y, z, data, 1.0f, 0);
+            return;
+        }
         if (mOnDestroyed) {
             printf("[AxoBlock] CALLING mOnDestroyed...\n"); fflush(stdout);
             mOnDestroyed(x, y, z, level, sLastPlayer, sLastItem.get());
@@ -268,8 +306,11 @@ public:
     }
 
     void destroy(Level* level, int x, int y, int z, int data) override {
-        printf("[AxoBlock] destroy id=%d at %d,%d,%d mOnDestroyed=%d\n", id, x, y, z, (bool)mOnDestroyed); fflush(stdout);
+        printf("[AxoBlock] destroy id=%d at %d,%d,%d mOnDestroyed=%d isTnt=%d\n", id, x, y, z, (bool)mOnDestroyed, mIsTnt); fflush(stdout);
         Tile::destroy(level, x, y, z, data);
+        if (mIsTnt) {
+            return;
+        }
         if (mCanBeBrokenByHand) {
             Tile::spawnResources(level, x, y, z, data, 1.0f, 0);
         }
@@ -278,6 +319,77 @@ public:
             mOnDestroyed(x, y, z, level, sLastPlayer, sLastItem.get());
             printf("[AxoBlock] destroy: mOnDestroyed RETURNED\n"); fflush(stdout);
         }
+    }
+
+    void onPlace(Level* level, int x, int y, int z) override {
+        Tile::onPlace(level, x, y, z);
+        if (mIsTnt && mOnDestroyed && level->hasNeighborSignal(x, y, z)) {
+            if (!level->isClientSide) {
+                auto tnt = std::make_shared<AxoPrimedTnt>(level, x + 0.5, y + 0.5, z + 0.5,
+                                                           shared_ptr<LivingEntity>(), mOnDestroyed);
+                level->addEntity(tnt);
+                level->playEntitySound(tnt, eSoundType_RANDOM_FUSE, 1, 1.0f);
+            }
+            level->removeTile(x, y, z);
+        }
+    }
+
+    void neighborChanged(Level* level, int x, int y, int z, int type) override {
+        if (mIsTnt && mOnDestroyed && level->hasNeighborSignal(x, y, z)) {
+            if (!level->isClientSide) {
+                auto tnt = std::make_shared<AxoPrimedTnt>(level, x + 0.5, y + 0.5, z + 0.5,
+                                                           shared_ptr<LivingEntity>(), mOnDestroyed);
+                level->addEntity(tnt);
+                level->playEntitySound(tnt, eSoundType_RANDOM_FUSE, 1, 1.0f);
+            }
+            level->removeTile(x, y, z);
+        }
+    }
+
+    void wasExploded(Level* level, int x, int y, int z, Explosion* explosion) override {
+        if (mIsTnt && mOnDestroyed) {
+            if (!level->isClientSide) {
+                auto tnt = std::make_shared<AxoPrimedTnt>(level, x + 0.5, y + 0.5, z + 0.5,
+                    explosion ? explosion->getSourceMob() : shared_ptr<LivingEntity>(), mOnDestroyed);
+                tnt->life = level->random->nextInt(tnt->life / 4) + tnt->life / 8;
+                level->addEntity(tnt);
+            }
+        }
+    }
+
+    bool use(Level* level, int x, int y, int z, shared_ptr<Player> player,
+             int clickedFace, float clickX, float clickY, float clickZ, bool soundOnly = false) override {
+        if (soundOnly) return false;
+        if (mIsTnt && player->getSelectedItem() != nullptr &&
+            player->getSelectedItem()->id == Item::flintAndSteel_Id) {
+            if (!level->isClientSide && mOnDestroyed) {
+                auto tnt = std::make_shared<AxoPrimedTnt>(level, x + 0.5, y + 0.5, z + 0.5,
+                                                           player, mOnDestroyed);
+                level->addEntity(tnt);
+                level->playEntitySound(tnt, eSoundType_RANDOM_FUSE, 1, 1.0f);
+            }
+            level->removeTile(x, y, z);
+            player->getSelectedItem()->hurtAndBreak(1, player);
+            return true;
+        }
+        return Tile::use(level, x, y, z, player, clickedFace, clickX, clickY, clickZ);
+    }
+
+    void entityInside(Level* level, int x, int y, int z, shared_ptr<Entity> entity) override {
+        if (mIsTnt && entity->GetType() == eTYPE_ARROW && !level->isClientSide) {
+            if (entity->isOnFire() && mOnDestroyed) {
+                auto tnt = std::make_shared<AxoPrimedTnt>(level, x + 0.5, y + 0.5, z + 0.5,
+                                                           shared_ptr<LivingEntity>(), mOnDestroyed);
+                level->addEntity(tnt);
+                level->playEntitySound(tnt, eSoundType_RANDOM_FUSE, 1, 1.0f);
+                level->removeTile(x, y, z);
+            }
+        }
+    }
+
+    bool dropFromExplosion(Explosion* explosion) override {
+        if (mIsTnt) return false;
+        return Tile::dropFromExplosion(explosion);
     }
 };
 
